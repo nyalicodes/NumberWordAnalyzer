@@ -22,7 +22,7 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 
-    // Include XML comments
+    // Include XML comments if available
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     if (File.Exists(xmlPath))
@@ -32,6 +32,7 @@ builder.Services.AddSwaggerGen(options =>
 // Dependecy Injection
 builder.Services.AddScoped<IAnalyzerService, AnalyzerService>();
 
+// Rate limiting
 builder.Services.AddRateLimiter(options =>
 {
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
@@ -97,6 +98,15 @@ app.UseRateLimiter();
 
 app.UseAuthorization();
 
+// Root endpoint
+app.MapGet("/", () =>
+    "Welcome to NumberWordAnalyzer API. Visit /swagger/index.html to explore and test endpoints."
+);
+
 app.MapControllers();
+
+// Render.com port handling
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080"; // Use Render-assigned port
+app.Urls.Add($"http://*:{port}");
 
 app.Run();
