@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Threading.RateLimiting;
 using Microsoft.OpenApi.Models;
 using NumberWordAnalyzer.Services;
 
@@ -31,6 +32,36 @@ builder.Services.AddSwaggerGen(options =>
 // Dependecy Injection
 builder.Services.AddScoped<IAnalyzerService, AnalyzerService>();
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,       // Allow 10 requests per IP
+                Window = TimeSpan.FromSeconds(10),  // per 10 seconds
+                QueueLimit = 0,
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+            }
+        )
+    );
+
+    // Return custom message when rate limit is exceeded
+    options.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.StatusCode = 429;
+        await context.HttpContext.Response.WriteAsJsonAsync(new
+        {
+            error = "Too many requests. Slow down!",
+            retryAfter = context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retry)
+                ? retry.ToString()
+                : "unknown"
+        });
+    };
+});
+
+
 var app = builder.Build();
 
 // Global Exception Handling
@@ -61,6 +92,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseRateLimiter();
 
 app.UseAuthorization();
 
