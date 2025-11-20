@@ -7,11 +7,12 @@ An ASP.NET Core Web API that analyzes concatenated text strings and counts occur
 - **Number Word Detection**: Identifies and counts all occurrences of number words (1-9) in concatenated text
 - **Overlapping Match Support**: Uses advanced regex patterns to detect overlapping occurrences
 - **Rate Limiting**: Implements IP-based rate limiting (10 requests per 10 seconds per IP)
-- **API Documentation**: Integrated Swagger/OpenAPI documentation
+- **API Documentation**: Integrated Swagger/OpenAPI documentation (available in all environments at `/swagger`)
 - **Input Validation**: Validates input text (1-1000 characters)
 - **Global Exception Handling**: Comprehensive error handling with descriptive error messages
 - **Unit Tests**: Full test coverage with xUnit and Moq
 - **Docker Support**: Containerized deployment ready
+- **Cloud Deployment Ready**: Configured for Render.com, Railway, Heroku, and other cloud platforms
 
 ## Technologies Used
 
@@ -53,9 +54,11 @@ cd NumberWordAnalyzer
    dotnet run --project NumberWordAnalyzer/NumberWordAnalyzer.csproj
    ```
 
-4. **Access the API**
+4. **Access the API** (Development uses ports 5000/5001)
    - API: `http://localhost:5000` or `https://localhost:5001`
    - Swagger UI: `http://localhost:5000/swagger` or `https://localhost:5001/swagger`
+
+   > **Note**: When deployed to cloud or running in Docker, the app uses port 8080 (or the `PORT` environment variable)
 
 ### Running with Docker
 
@@ -72,6 +75,44 @@ cd NumberWordAnalyzer
 3. **Access the API**
    - API: `http://localhost:8080`
    - Swagger UI: `http://localhost:8080/swagger`
+
+## Cloud Deployment
+
+The application is configured for cloud deployment platforms like Render.com, Railway, Heroku, etc.
+
+### Key Features
+
+- **Dynamic Port Configuration**: Reads `PORT` environment variable (defaults to 8080)
+- **Swagger in Production**: API documentation available in all environments at `/swagger`
+- **SSL/TLS Handling**: HTTPS redirection disabled in production (cloud providers handle SSL termination)
+- **IP-based Rate Limiting**: Works across distributed deployments
+
+### Deployment Steps
+
+1. **Set Environment Variables** (if required by your platform):
+   ```bash
+   PORT=8080  # Usually auto-configured by the platform
+   ```
+
+2. **Deploy using Docker**:
+   - Most cloud platforms support Dockerfile-based deployments
+   - The app will automatically use the `PORT` environment variable
+
+3. **Deploy from Git**:
+   - Connect your repository to the deployment platform
+   - The platform will detect the .NET project and build automatically
+
+4. **Access your deployed API**:
+   - API: `https://your-app.platform.com`
+   - Swagger UI: `https://your-app.platform.com/swagger`
+
+### Supported Platforms
+
+- **Render.com**: Fully configured and tested
+- **Railway**: Compatible with PORT environment variable
+- **Heroku**: Compatible (requires Dockerfile deployment)
+- **Azure App Service**: Compatible
+- **AWS Elastic Beanstalk**: Compatible
 
 ## API Documentation
 
@@ -209,22 +250,36 @@ The analyzer uses a lookahead regex pattern to detect overlapping matches:
 
 ## Configuration
 
-### Changing Rate Limit Settings
+### Port Configuration
 
-Edit `Program.cs` to modify rate limiting:
+The application automatically configures ports based on the environment:
+
+**Local Development** (`launchSettings.json`):
+```bash
+export ASPNETCORE_URLS="http://localhost:5000;https://localhost:5001"
+```
+
+**Cloud Deployment** (reads from environment variable):
+```bash
+export PORT=8080  # Or any port required by your cloud provider
+```
+
+**Code Reference**: See `Program.cs:8-13` for the PORT configuration logic.
+
+### Rate Limit Settings
+
+Edit `Program.cs:43-70` to modify rate limiting:
 
 ```csharp
 PermitLimit = 10,                          // Requests per window
 Window = TimeSpan.FromSeconds(10),         // Time window
 ```
 
-### Changing Port Settings
+### Environment-Specific Behavior
 
-Edit `launchSettings.json` or use environment variables:
-
-```bash
-export ASPNETCORE_URLS="http://localhost:5000;https://localhost:5001"
-```
+- **Development**: HTTPS redirection enabled, uses ports 5000/5001
+- **Production/Cloud**: HTTPS redirection disabled (handled by cloud provider), uses PORT environment variable (default: 8080)
+- **Swagger**: Enabled in all environments at `/swagger`
 
 ## Contributing
 
