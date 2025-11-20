@@ -5,6 +5,13 @@ using NumberWordAnalyzer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure port for cloud deployment (e.g., Render.com)
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(int.Parse(port));
+});
+
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -86,13 +93,19 @@ app.UseExceptionHandler(errorApp =>
 });
 
 // Configure the HTTP request pipeline.
+// Enable Swagger in all environments (useful for cloud deployments)
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Number Word Analyzer API v1");
+    c.RoutePrefix = "swagger"; // Access via /swagger
+});
+
+// Only redirect to HTTPS in Development (Render handles SSL termination)
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseHttpsRedirection();
 }
-
-app.UseHttpsRedirection();
 
 app.UseRateLimiter();
 
@@ -100,13 +113,9 @@ app.UseAuthorization();
 
 // Root endpoint
 app.MapGet("/", () =>
-    "Welcome to NumberWordAnalyzer API. Visit /swagger/index.html to explore and test endpoints."
+    "Welcome to NumberWordAnalyzer API. Visit /swagger to explore and test endpoints."
 );
 
 app.MapControllers();
-
-// Render.com port handling
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080"; // Use Render-assigned port
-app.Urls.Add($"http://*:{port}");
 
 app.Run();
