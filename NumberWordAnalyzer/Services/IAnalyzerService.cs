@@ -2,6 +2,6 @@
 {
     public interface IAnalyzerService
     {
-        Dictionary<string, int> AnalyzeText(string inputText);
+        Task<Dictionary<string, int>> AnalyzeText(string inputText);
     }
 }

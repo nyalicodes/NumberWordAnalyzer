@@ -15,7 +15,7 @@ namespace NumberWordAnalyzer.Tests.Services
         [InlineData("onetwothreeone", 2, 1, 1, 0, 0, 0, 0, 0, 0)]
         [InlineData("fivefivefive", 0, 0, 0, 0, 3, 0, 0, 0, 0)]
         [InlineData("twoonethree", 1, 1, 1, 0, 0, 0, 0, 0, 0)]
-        public void AnalyzeText_ShouldReturnCorrectCounts(string input, params int[] expectedCounts)
+        public async Task AnalyzeText_ShouldReturnCorrectCounts(string input, params int[] expectedCounts)
         {
             var expected = new Dictionary<string, int>
             {
@@ -30,23 +30,23 @@ namespace NumberWordAnalyzer.Tests.Services
                 { "nine", expectedCounts[8] }
             };
 
-            var result = _analyzerService.AnalyzeText(input);
+            var result = await _analyzerService.AnalyzeText(input);
 
             Assert.Equal(expected, result);
         }
 
         [Fact]
-        public void AnalyzeText_EmptyString_ShouldReturnAllZeroCounts()
+        public async Task AnalyzeText_EmptyString_ShouldReturnAllZeroCounts()
         {
-            var result = _analyzerService.AnalyzeText("abcdefghijklmnopqrstuvwxyz");
+            var result = await _analyzerService.AnalyzeText("abcdefghijklmnopqrstuvwxyz");
 
             Assert.All(result.Values, count => Assert.Equal(0, count));
         }
 
         [Fact]
-        public void AnalyzeText_NullInput_ShouldThrowArgumentNullException()
+        public async Task AnalyzeText_NullInput_ShouldThrowArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => _analyzerService.AnalyzeText(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _analyzerService.AnalyzeText(null!));
         }
     }
 }

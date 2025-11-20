@@ -5,24 +5,27 @@ namespace NumberWordAnalyzer.Services
 {
     public class AnalyzerService : IAnalyzerService
     {
-        public Dictionary<string, int> AnalyzeText(string inputText)
+        public Task<Dictionary<string, int>> AnalyzeText(string inputText)
         {
             if (inputText == null)
                 throw new ArgumentNullException(nameof(inputText), "Input text cannot be null.");
 
-            var result = new Dictionary<string, int>();
-
-            foreach (var word in NumberWords.Words)
+            return Task.Run(() =>
             {
-                // Overlapping regex: (?=(word))
-                var pattern = $"(?=({Regex.Escape(word)}))";
+                var result = new Dictionary<string, int>();
 
-                var matches = Regex.Matches(inputText, pattern, RegexOptions.IgnoreCase);
+                foreach (var word in NumberWords.Words)
+                {
+                    // Overlapping regex: (?=(word))
+                    var pattern = $"(?=({Regex.Escape(word)}))";
 
-                result[word] = matches.Count;
-            }
+                    var matches = Regex.Matches(inputText, pattern, RegexOptions.IgnoreCase);
 
-            return result;
+                    result[word] = matches.Count;
+                }
+
+                return result;
+            });
         }
     }
 }

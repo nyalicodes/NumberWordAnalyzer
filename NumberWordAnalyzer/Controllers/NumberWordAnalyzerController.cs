@@ -60,7 +60,7 @@ namespace NumberWordAnalyzer.Controllers
         [ProducesResponseType(typeof(Dictionary<string, int>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult Analyze([FromBody] AnalyzeNumberWordDto input)
+        public async Task<IActionResult> Analyze([FromBody] AnalyzeNumberWordDto input)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -69,7 +69,7 @@ namespace NumberWordAnalyzer.Controllers
             {
                 var cleanInputText = (input.InputText ?? string.Empty).Trim();
 
-                var analysisResult = _analyzerService.AnalyzeText(cleanInputText);
+                var analysisResult = await _analyzerService.AnalyzeText(cleanInputText);
                 return Ok(analysisResult);
             }
             catch (Exception ex)

@@ -19,7 +19,7 @@ namespace NumberWordAnalyzer.Tests.Controllers
         }
 
         [Fact]
-        public void AnalyzeText_ValidInput_ReturnsExpectedResult()
+        public async Task AnalyzeText_ValidInput_ReturnsExpectedResult()
         {
             var input = new AnalyzeNumberWordDto { InputText = "onetwothreeonenine" };
 
@@ -38,9 +38,9 @@ namespace NumberWordAnalyzer.Tests.Controllers
 
             _analyzerServiceMock
                 .Setup(s => s.AnalyzeText(input.InputText))
-                .Returns(expectedResult);
+                .ReturnsAsync(expectedResult);
 
-            var response = _numberWordAnalyzerCotroller.Analyze(input);
+            var response = await _numberWordAnalyzerCotroller.Analyze(input);
 
             var okResult = Assert.IsType<OkObjectResult>(response);
             Assert.Equal(expectedResult, okResult.Value);
@@ -48,25 +48,25 @@ namespace NumberWordAnalyzer.Tests.Controllers
         }
 
         [Fact]
-        public void AnalyzeText_NullModel_ReturnsBadRequest()
+        public async Task AnalyzeText_NullModel_ReturnsBadRequest()
         {
             _numberWordAnalyzerCotroller.ModelState.AddModelError("InputText", "The InputText field is required.");
 
-            var response = _numberWordAnalyzerCotroller.Analyze(null);
+            var response = await _numberWordAnalyzerCotroller.Analyze(null!);
 
             Assert.IsType<BadRequestObjectResult>(response);
         }
 
         [Fact]
-        public void Analyze_ServiceThrowsException_Returns500()
+        public async Task Analyze_ServiceThrowsException_Returns500()
         {
             var input = new AnalyzeNumberWordDto { InputText = "test" };
 
             _analyzerServiceMock
                 .Setup(s => s.AnalyzeText(input.InputText))
-                .Throws(new Exception("Test error"));
+                .ThrowsAsync(new Exception("Test error"));
 
-            var result = _numberWordAnalyzerCotroller.Analyze(input);
+            var result = await _numberWordAnalyzerCotroller.Analyze(input);
 
             var objectResult = Assert.IsType<ObjectResult>(result);
 
