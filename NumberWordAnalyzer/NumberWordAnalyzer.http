@@ -1,0 +1,6 @@
+@NumberWordAnalyzer_HostAddress = http://localhost:5012
+
+GET {{NumberWordAnalyzer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
