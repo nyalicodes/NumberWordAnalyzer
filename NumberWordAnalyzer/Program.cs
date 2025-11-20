@@ -111,11 +111,6 @@ app.UseRateLimiter();
 
 app.UseAuthorization();
 
-// Root endpoint
-app.MapGet("/", () =>
-    "Welcome to NumberWordAnalyzer API. Visit /swagger to explore and test endpoints."
-);
-
 app.MapControllers();
 
 app.Run();
