@@ -5,7 +5,7 @@ using NumberWordAnalyzer.Application;
 using NumberWordAnalyzer.Controllers;
 using NumberWordAnalyzer.Services;
 
-namespace NumberWordAnalyzer.Tests
+namespace NumberWordAnalyzer.Tests.Controllers
 {
     public class NumberWordAnalyzerControllerTests
     {
